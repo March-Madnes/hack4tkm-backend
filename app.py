@@ -1,5 +1,8 @@
-from core import app
+from core import app, db
 from waitress import serve
+
+with app.app_context():
+    db.create_all()
 
 mode = 'dev'
 
