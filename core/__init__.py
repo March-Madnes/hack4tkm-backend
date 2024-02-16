@@ -2,9 +2,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy 
 import os
 
-# fernet key for encrypting and decrypting data
-# fernet = Fernet(os.getenv("FERNET_KEY"))
-
 db = SQLAlchemy()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
