@@ -8,8 +8,10 @@ from pymongo.server_api import ServerApi
 
 load_dotenv()
 
-uri = os.getenv("MONGO_URI")
-mongo_client = MongoClient(uri, server_api=ServerApi("1"))
+# uri = os.getenv("MONGO_URI")
+# mongo_client = MongoClient(uri, server_api=ServerApi("1"))
+# mongo_db = mongo_client["imoisture"]
+
 db = SQLAlchemy()
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"

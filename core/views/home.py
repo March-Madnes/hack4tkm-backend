@@ -1,14 +1,19 @@
 import io
+import json
 
 import numpy as np
-from flask import Blueprint, jsonify, render_template, request
+import tensorflow as tf
+
+from flask import Blueprint, jsonify, request
 from PIL import Image
 from tensorflow.keras.models import load_model
+
+# from core import mongo_db
 
 home = Blueprint("home", __name__)
 
 
-def predict(image, model):
+def predict_soil_type(image, model):
     """
     Input the image and model, this function outputs the prediction as:
         1. The class with the highest probability
@@ -16,6 +21,7 @@ def predict(image, model):
     """
 
     LABELS = ["Red soil", "Black Soil", "Clay soil", "Alluvial soil"]
+
     label_encoder = {label: idx for idx, label in enumerate(LABELS)}
     label_decoder = {idx: label for idx, label in enumerate(LABELS)}
     label_encoder, label_decoder
@@ -29,17 +35,47 @@ def predict(image, model):
     resized_img_array = resized_img_array.reshape(-1, IMAGE_SIZE, IMAGE_SIZE, 3)
     probabilities = model.predict(resized_img_array).reshape(-1)
     pred = LABELS[np.argmax(probabilities)]
-    return {
-        "pred": pred,
-        "probabilities": {
-            label: float(prob) for label, prob in zip(LABELS, probabilities)
-        },
+    return pred
+
+
+def predict_soil_moisture(image, model):
+    LABELS = {
+        0: "0",
+        1: "10",
+        2: "20",
+        3: "30",
+        4: "40",
+        5: "50",
+        6: "60",
+        7: "70",
+        8: "80",
     }
 
+    IMAGE_SIZE = 256
+    image = Image.open(io.BytesIO(image))
+    if image.mode != "RGB":
+        image = image.convert("RGB")
 
-@home.route("/")
-def home_html():
-    return render_template("home.html")
+    # # Convert the image to a numpy array
+    image_array = np.array(image)
+    resize = tf.image.resize(image_array, (256, 256))
+    print(type(resize))
+    probabilities = model.predict(np.expand_dims(resize / 255, 0)).reshape(-1)
+    pred = LABELS[np.argmax(probabilities)]
+    return pred
+
+
+# def find_data(collection_name, query):
+#     try:
+#         collection = mongo_db[collection_name]
+#         result = collection.find_one(query)
+
+#         if result:
+#             return result
+#         else:
+#             return None
+#     except:
+#         pass
 
 
 @home.route("/api")
@@ -48,13 +84,36 @@ def home_latest():
 
 
 @home.route("/api/predict", methods=["POST"])
-def predict_moisture():
-    model = load_model("core/trained_models/soil_classification.h5")
+def analyse_soil():
+    model_soil_type = load_model("trained_models/soil_classification.h5")
+    model_soil_moisture = load_model("trained_models/soil_moisture.h5")
+
     image = request.files.get("image")
     if image:
         img_bytes = image.read()
-        pred = predict(img_bytes, model)
-
-        return jsonify({"message": pred})
+        pred_soil_type = predict_soil_type(img_bytes, model_soil_type)
+        pred_soil_moisture = predict_soil_moisture(img_bytes, model_soil_moisture)
+        return jsonify(
+            {"soil_type": pred_soil_type, "soil_moisture": pred_soil_moisture}
+        )
 
     return "no image found"
+
+
+# @home.route("/api/mongo", methods=["GET"])
+# def mongo_test():
+#     collection = mongo_db["test"]
+#     data = {
+#         "field1": "value1",
+#         "field2": "value2",
+#     }
+
+#     # collection.insert_one(data)
+
+#     query = {"field1": "value1"}
+#     result = find_data("test", query)
+
+#     if result:
+#         return json.loads(json_util.dumps(result))
+
+#     return "Not Found", 404
