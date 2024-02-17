@@ -4,9 +4,11 @@ import json
 import numpy as np
 import tensorflow as tf
 
+import pandas as pd
 from flask import Blueprint, jsonify, request
 from PIL import Image
 from tensorflow.keras.models import load_model
+from joblib import load
 
 # from core import mongo_db
 
@@ -65,6 +67,15 @@ def predict_soil_moisture(image, model):
     return pred
 
 
+def crop_suggestion():
+    data = [[23, 43, 200, 29.763, 79.234, 6.5, 75.23]]
+    dt_classifier_gini = load("trained_models/crop_pred.pkl")
+    if dt_classifier_gini.predict(data):
+        return dt_classifier_gini.predict(data)
+    else:
+        return None
+
+
 # def find_data(collection_name, query):
 #     try:
 #         collection = mongo_db[collection_name]
@@ -98,6 +109,11 @@ def analyse_soil():
         )
 
     return "no image found"
+
+
+@home.route("/api/crop_suggest")
+def crop_suggest_api():
+    return crop_suggestion()
 
 
 # @home.route("/api/mongo", methods=["GET"])

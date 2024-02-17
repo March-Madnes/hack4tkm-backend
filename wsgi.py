@@ -17,4 +17,4 @@ if __name__ == "__main__":
     if mode == "prod":
         serve(app, host="0.0.0.0", port=8000, threads=4)
     else:
-        app.run(host="0.0.0.0", port=5000, debug=True)
+        app.run(host="0.0.0.0", port=8080, debug=True)
