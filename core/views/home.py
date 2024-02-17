@@ -68,10 +68,20 @@ def predict_soil_moisture(image, model):
 
 
 def crop_suggestion():
-    data = [[23, 43, 200, 29.763, 79.234, 6.5, 75.23]]
+    input_data = pd.DataFrame(
+        {
+            "N": [23],
+            "P": [43],
+            "K": [200],
+            "temperature": [29.763],
+            "humidity": [79.234],
+            "ph": [6.5],
+            "rainfall": [75.23],
+        }
+    )
     dt_classifier_gini = load("trained_models/crop_pred.pkl")
-    if dt_classifier_gini.predict(data):
-        return dt_classifier_gini.predict(data)
+    if dt_classifier_gini.predict(input_data):
+        return {"crop": str(dt_classifier_gini.predict(input_data)[0])}
     else:
         return None
 

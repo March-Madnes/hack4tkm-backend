@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from waitress import serve
 
-from core import app, db
+from core import app, db    
 
 load_dotenv()
 
