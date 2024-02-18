@@ -148,8 +148,8 @@ def crop_suggest_api():
     phosphorous = request.args.get("phosphorous", default=90)
     potassium = request.args.get("potassium", default=120)
     ph = request.args.get("ph", default=6)
-    lat = request.args.get("lat")
-    lon = request.args.get("lon")
+    lat = request.args.get("lat", default=8.88113000)
+    lon = request.args.get("lon", default=76.58469000)
     return crop_suggestion(
         nitrogen=nitrogen,
         phosphorous=phosphorous,
